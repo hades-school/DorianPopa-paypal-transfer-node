@@ -1,5 +1,10 @@
-<%- include("./layout/head") %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include("./layout/head") %>
+  </head>
   <body>
+    <%- include("./layout/header") %>
     <h1>Send Money</h1>
     <form action="/transfer" method="POST">
       <label for="receiver_email">Receiver Email:</label>
@@ -10,5 +15,6 @@
       <br /><br />
       <input type="submit" value="Send Money" />
     </form>
+    <%- include("./layout/foot") %>
   </body>
 </html>

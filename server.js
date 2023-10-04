@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const paypal = require("paypal-rest-sdk");
 
 const app = express();
+app.use(express.static('public'));
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 

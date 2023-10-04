@@ -1,5 +1,10 @@
-<%- include("./layout/head") %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include("./layout/head") %>
+  </head>
   <body>
+    <%- include("./layout/header") %>
     <h1>Transfer Result</h1>
     <% if (success) { %>
     <p><strong>Transfer successful!</strong></p>
@@ -7,5 +12,6 @@
     <p><strong>Transfer failed!</strong></p>
     <% } %>
     <a href="/transfer">Go back</a>
+    <%- include("./layout/foot") %>
   </body>
 </html>
