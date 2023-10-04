@@ -54,10 +54,18 @@ app.get("/credentials", (req, res) => {
   res.render("credentials", { title: "PayPal Credentials" });
 });
 
-app.post("/credentials", (req, res) => {
-  setPaypalConfigure(req.body.client_id, req.body.client_secret);
-  // res.render("credentials");
-  res.redirect("/transfer");
+app.post("/credentials", async (req, res) => {
+  try {
+    setPaypalConfigure(req.body.client_id, req.body.client_secret);
+    const params = {
+      page_size: 10, // Set the desired page size
+    };
+    const contactList = await getContactList(params);
+    const paypalBalance = await getPaypalBalance();
+    res.render("transfer", { paypalBalance, contactList, title: "Send Money" });
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Page with the transfer form
@@ -67,50 +75,6 @@ app.get("/transfer", async (req, res, next) => {
       page_size: 10, // Set the desired page size
     };
     const contactList = await getContactList(params);
-    // [
-    //   {
-    //     id: "C-4L8791234567890",
-    //     email: "john.doe@example.com",
-    //     name: {
-    //       given_name: "John",
-    //       surname: "Doe",
-    //     },
-    //     phone: {
-    //       country_code: "1",
-    //       national_number: "5551234567",
-    //     },
-    //     addresses: [
-    //       {
-    //         line1: "123 Main St",
-    //         city: "San Jose",
-    //         state: "CA",
-    //         postal_code: "95131",
-    //         country_code: "US",
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     id: "C-4L8791234567891",
-    //     email: "john.ali@example.com",
-    //     name: {
-    //       given_name: "John",
-    //       surname: "Ali",
-    //     },
-    //     phone: {
-    //       country_code: "1",
-    //       national_number: "5551234568",
-    //     },
-    //     addresses: [
-    //       {
-    //         line1: "123 Main St",
-    //         city: "San Jose",
-    //         state: "CA",
-    //         postal_code: "95131",
-    //         country_code: "US",
-    //       },
-    //     ],
-    //   },
-    // ]; 
     const paypalBalance = await getPaypalBalance();
     res.render("transfer", { paypalBalance, contactList, title: "Send Money" });
   } catch (error) {
