@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const paypal = require("paypal-rest-sdk");
+const { setCredential, getCredential } = require("./credentials");
 
 const app = express();
 app.use(express.static("public"));
@@ -8,11 +9,11 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Configure PayPal SDK with your credentials
-const setPaypalConfigure = (id, secret) =>
+const setPaypalConfigure = ({ id, secret }) =>
   paypal.configure({
     mode: "sandbox", // Change to 'live' for production
-    client_id: "YOUR_CLIENT_ID",
-    client_secret: "YOUR_CLIENT_SECRET",
+    client_id: id,
+    client_secret: secret,
   });
 const getPaypalBalance = () =>
   new Promise((res, rej) => {
@@ -54,15 +55,28 @@ app.get("/credentials", (req, res) => {
   res.render("credentials", { title: "PayPal Credentials" });
 });
 
-app.post("/credentials", async (req, res) => {
+app.post("/credentials", async (req, res, next) => {
   try {
-    setPaypalConfigure(req.body.client_id, req.body.client_secret);
     const params = {
       page_size: 10, // Set the desired page size
     };
+    setCredential({ id: req.body.client_id, secret: req.body.client_secret });
+    setPaypalConfigure({
+      id: req.body.client_id,
+      secret: req.body.client_secret,
+    });
     const contactList = await getContactList(params);
+    setPaypalConfigure({
+      id: req.body.client_id,
+      secret: req.body.client_secret,
+    });
     const paypalBalance = await getPaypalBalance();
-    res.render("transfer", { paypalBalance, contactList, title: "Send Money" });
+    res.render("transfer", {
+      paypalBalance,
+      contactList,
+      title: "Send Money",
+      credential: req.body.client_id,
+    });
   } catch (error) {
     next(error);
   }
@@ -74,9 +88,18 @@ app.get("/transfer", async (req, res, next) => {
     const params = {
       page_size: 10, // Set the desired page size
     };
+    const credential = getCredential(req.query.credential);
+    if (!credential) return res.redirect("/");
+    setPaypalConfigure(credential);
     const contactList = await getContactList(params);
+    setPaypalConfigure(credential);
     const paypalBalance = await getPaypalBalance();
-    res.render("transfer", { paypalBalance, contactList, title: "Send Money" });
+    res.render("transfer", {
+      paypalBalance,
+      contactList,
+      title: "Send Money",
+      credential: credential.id,
+    });
   } catch (error) {
     next(error);
   }
@@ -84,6 +107,8 @@ app.get("/transfer", async (req, res, next) => {
 
 // Handle the transfer form submission
 app.post("/transfer", async (req, res) => {
+  const credential = getCredential(req.body.credential);
+  if (!credential) return res.redirect("/");
   try {
     const receiverEmail = req.body.receiver_email;
     const payAmount = req.body.pay_amount;
@@ -106,13 +131,16 @@ app.post("/transfer", async (req, res) => {
         },
       ],
     };
+    setPaypalConfigure(credential);
     await createPaypal(create_payout_json);
+    setPaypalConfigure(credential);
     const paypalBalance = await getPaypalBalance();
     res.render("transfer_result", {
       success: true,
       message: "Transfer successful",
       paypalBalance,
       title: "Transfer Result",
+      credential: credential.id,
     });
   } catch (error) {
     res.render("transfer_result", {
@@ -120,19 +148,21 @@ app.post("/transfer", async (req, res) => {
       message: "Transfer failed",
       paypalBalance: 0,
       title: "Transfer Result",
+      credential: credential.id,
     });
   }
 });
 
 // Transfer result page
-app.get("/transfer_result", (req, res) => {
-  res.render("transfer_result", {
-    success: false,
-    message: "Transfer result",
-    paypalBalance: 1892738921,
-    title: "Transfer Result",
-  });
-});
+// app.get("/transfer_result", (req, res) => {
+//   res.render("transfer_result", {
+//     success: false,
+//     message: "Transfer result",
+//     paypalBalance: 1892738921,
+//     title: "Transfer Result",
+//     credential: "",
+//   });
+// });
 
 // Start the server
 app.listen(3000, () => {

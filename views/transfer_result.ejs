@@ -31,7 +31,11 @@
             <% } else { %>
             <p><strong>Transfer failed!</strong></p>
             <% } %>
-            <a href="/transfer" class="btn btn-primary">Go back</a>
+            <a
+              href="/transfer?credential=<%= credential %>"
+              class="btn btn-primary"
+              >Go back</a
+            >
           </div>
         </div>
       </div>

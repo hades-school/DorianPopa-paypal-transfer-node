@@ -13,3 +13,9 @@ const setCredential = (data) => {
     );
   else credentials.push(data);
 };
+
+module.exports = {
+  getCredential,
+  getCredentials,
+  setCredential,
+};

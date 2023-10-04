@@ -26,6 +26,7 @@
           method="POST"
           class="col-lg-6 col-md-8 col-sm-11"
         >
+          <input type="hidden" name="credential" value="<%= credential %>" />
           <label for="receiver_email">Receiver Email:</label>
           <input
             type="email"
@@ -37,7 +38,10 @@
           />
           <datalist id="contactList">
             <% for(let contact of contactList){ %>
-            <option value="<%= contact.email %>">"<%= contact.email %>" <%= contact.name.given_name %> <%= contact.name.surname %></option>
+            <option value="<%= contact.email %>">
+              "<%= contact.email %>" <%= contact.name.given_name %> <%=
+              contact.name.surname %>
+            </option>
             <% } %>
           </datalist>
           <br /><br />
