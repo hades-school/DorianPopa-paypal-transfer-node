@@ -1,0 +1,14 @@
+<%- include("./layout/head") %>
+  <body>
+    <h1>Send Money</h1>
+    <form action="/transfer" method="POST">
+      <label for="receiver_email">Receiver Email:</label>
+      <input type="email" id="receiver_email" name="receiver_email" required />
+      <br /><br />
+      <label for="pay_amount">Payment Amount:</label>
+      <input type="number" id="pay_amount" name="pay_amount" required />
+      <br /><br />
+      <input type="submit" value="Send Money" />
+    </form>
+  </body>
+</html>
