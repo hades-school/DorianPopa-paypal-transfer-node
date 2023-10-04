@@ -5,13 +5,41 @@
   </head>
   <body>
     <%- include("./layout/header") %>
-    <h1>Transfer Result</h1>
-    <% if (success) { %>
-    <p><strong>Transfer successful!</strong></p>
-    <% } else { %>
-    <p><strong>Transfer failed!</strong></p>
-    <% } %>
-    <a href="/transfer">Go back</a>
+
+    <div class="container">
+      <h1>Transfer Result</h1>
+      <div class="d-flex justify-content-center mt-3">
+        <div>
+          <p><b>Paypal Balance</b></p>
+          <h3>
+            $
+            <span id="total-balance">
+              <%= Number(paypalBalance).toLocaleString() %>
+            </span>
+          </h3>
+          <p>Estimated total of all curriences</p>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-center">
+        <div
+          class="col-lg-6 col-md-8 col-sm-11 d-flex justify-content-center p-3 bg-white rounded"
+        >
+          <div>
+            <% if (success) { %>
+            <p><strong>Transfer successful!</strong></p>
+            <% } else { %>
+            <p><strong>Transfer failed!</strong></p>
+            <% } %>
+            <a href="/transfer" class="btn btn-primary">Go back</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- footer -->
+    <%- include("./layout/footer") %>
+    <!-- scripts -->
     <%- include("./layout/foot") %>
   </body>
 </html>

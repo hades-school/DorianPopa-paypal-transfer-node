@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const paypal = require("paypal-rest-sdk");
 
 const app = express();
-app.use(express.static('public'));
+app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -15,7 +15,7 @@ const setPaypalConfigure = (id, secret) =>
     client_secret: "YOUR_CLIENT_SECRET",
   });
 const getPaypalBalance = () =>
-  new Promist((res, rej) => {
+  new Promise((res, rej) => {
     paypal.payment.getBalance({}, (error, balance) => {
       if (error) {
         rej(error);
@@ -35,8 +35,21 @@ const createPaypal = (create_payout_json) =>
       }
     });
   });
+const getContactList = (params) =>
+  new Promise((res, rej) => {
+    paypal.contact.list(params, (error, contacts) => {
+      if (error) {
+        rej(error);
+      } else {
+        res(contacts);
+      }
+    });
+  });
 
 // Page to set your PayPal credentials
+app.get("/", (req, res) => {
+  res.render("credentials", { title: "PayPal Credentials" });
+});
 app.get("/credentials", (req, res) => {
   res.render("credentials", { title: "PayPal Credentials" });
 });
@@ -50,8 +63,56 @@ app.post("/credentials", (req, res) => {
 // Page with the transfer form
 app.get("/transfer", async (req, res, next) => {
   try {
+    const params = {
+      page_size: 10, // Set the desired page size
+    };
+    const contactList = await getContactList(params);
+    // [
+    //   {
+    //     id: "C-4L8791234567890",
+    //     email: "john.doe@example.com",
+    //     name: {
+    //       given_name: "John",
+    //       surname: "Doe",
+    //     },
+    //     phone: {
+    //       country_code: "1",
+    //       national_number: "5551234567",
+    //     },
+    //     addresses: [
+    //       {
+    //         line1: "123 Main St",
+    //         city: "San Jose",
+    //         state: "CA",
+    //         postal_code: "95131",
+    //         country_code: "US",
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     id: "C-4L8791234567891",
+    //     email: "john.ali@example.com",
+    //     name: {
+    //       given_name: "John",
+    //       surname: "Ali",
+    //     },
+    //     phone: {
+    //       country_code: "1",
+    //       national_number: "5551234568",
+    //     },
+    //     addresses: [
+    //       {
+    //         line1: "123 Main St",
+    //         city: "San Jose",
+    //         state: "CA",
+    //         postal_code: "95131",
+    //         country_code: "US",
+    //       },
+    //     ],
+    //   },
+    // ]; 
     const paypalBalance = await getPaypalBalance();
-    res.render("transfer", { paypalBalance, title: "Send Money" });
+    res.render("transfer", { paypalBalance, contactList, title: "Send Money" });
   } catch (error) {
     next(error);
   }
@@ -87,11 +148,14 @@ app.post("/transfer", async (req, res) => {
       success: true,
       message: "Transfer successful",
       paypalBalance,
+      title: "Transfer Result",
     });
   } catch (error) {
     res.render("transfer_result", {
       success: false,
       message: "Transfer failed",
+      paypalBalance: 0,
+      title: "Transfer Result",
     });
   }
 });
@@ -101,6 +165,7 @@ app.get("/transfer_result", (req, res) => {
   res.render("transfer_result", {
     success: false,
     message: "Transfer result",
+    paypalBalance: 1892738921,
     title: "Transfer Result",
   });
 });

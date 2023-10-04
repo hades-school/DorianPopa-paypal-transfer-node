@@ -5,16 +5,59 @@
   </head>
   <body>
     <%- include("./layout/header") %>
-    <h1>Send Money</h1>
-    <form action="/transfer" method="POST">
-      <label for="receiver_email">Receiver Email:</label>
-      <input type="email" id="receiver_email" name="receiver_email" required />
-      <br /><br />
-      <label for="pay_amount">Payment Amount:</label>
-      <input type="number" id="pay_amount" name="pay_amount" required />
-      <br /><br />
-      <input type="submit" value="Send Money" />
-    </form>
+
+    <div class="container">
+      <h1>Send Money</h1>
+      <div class="d-flex justify-content-center mt-3">
+        <div>
+          <p><b>Paypal Balance</b></p>
+          <h3>
+            $
+            <span id="total-balance">
+              <%= Number(paypalBalance).toLocaleString() %>
+            </span>
+          </h3>
+          <p>Estimated total of all curriences</p>
+        </div>
+      </div>
+      <div class="d-flex justify-content-center">
+        <form
+          action="/transfer"
+          method="POST"
+          class="col-lg-6 col-md-8 col-sm-11"
+        >
+          <label for="receiver_email">Receiver Email:</label>
+          <input
+            type="email"
+            id="receiver_email"
+            name="receiver_email"
+            class="form-control"
+            list="contactList"
+            required
+          />
+          <datalist id="contactList">
+            <% for(let contact of contactList){ %>
+            <option value="<%= contact.email %>">"<%= contact.email %>" <%= contact.name.given_name %> <%= contact.name.surname %></option>
+            <% } %>
+          </datalist>
+          <br /><br />
+          <label for="pay_amount">Payment Amount:</label>
+          <input
+            type="number"
+            id="pay_amount"
+            name="pay_amount"
+            class="form-control"
+            required
+          />
+          <br /><br />
+          <input type="submit" value="Send Money" class="btn btn-primary" />
+        </form>
+      </div>
+    </div>
+
+    <!-- footer -->
+    <%- include("./layout/footer") %>
+    <!-- scripts -->
     <%- include("./layout/foot") %>
   </body>
 </html>
