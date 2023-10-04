@@ -3,7 +3,7 @@ name: Node.js with-paypal
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
